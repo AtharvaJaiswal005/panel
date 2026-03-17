@@ -45,8 +45,8 @@ export class EChartsView extends HTMLBoxView {
 
   override connect_signals(): void {
     super.connect_signals()
-    const {width, height, renderer, theme, event_config, js_events, data} = this.model.properties
-    this.on_change(data, () => this._plot())
+    const {width, height, renderer, theme, event_config, js_events, data, map_data} = this.model.properties
+    this.on_change([data, map_data], () => this._plot())
     this.on_change([width, height], () => this._resize())
     this.on_change([theme, renderer], () => {
       this.render()
@@ -91,6 +91,12 @@ export class EChartsView extends HTMLBoxView {
   _plot(): void {
     if ((window as any).echarts == null) {
       return
+    }
+    const map_data = this.model.map_data
+    if (map_data != null) {
+      for (const [name, geo_json] of Object.entries(map_data)) {
+        (window as any).echarts.registerMap(name, geo_json)
+      }
     }
     const data = transformJsPlaceholders(this.model.data)
     this._chart.setOption(data, this.model.options)
@@ -154,6 +160,7 @@ export namespace ECharts {
   export type Attrs = p.AttrsOf<Props>
   export type Props = HTMLBox.Props & {
     data: p.Property<any>
+    map_data: p.Property<any>
     options: p.Property<any>
     event_config: p.Property<any>
     js_events: p.Property<any>
@@ -178,6 +185,7 @@ export class ECharts extends HTMLBox {
 
     this.define<ECharts.Props>(({Any, Str}) => ({
       data:          [ Any,           {} ],
+      map_data:      [ Any,           {} ],
       options:       [ Any,           {} ],
       event_config:  [ Any,           {} ],
       js_events:     [ Any,           {} ],

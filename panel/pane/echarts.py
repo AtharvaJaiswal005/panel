@@ -37,6 +37,12 @@ class ECharts(ModelPane):
     object = param.Parameter(default=None, doc="""
         The Echarts object being wrapped. Can be an Echarts dictionary or a pyecharts chart""")
 
+    map_data = param.Dict(default=None, doc="""
+        A dictionary of map name to GeoJSON feature collection.
+        Maps are registered via echarts.registerMap before setOption
+        is called, enabling geo and map series visualizations.
+        For example: {'USA': usa_geojson, 'world': world_geojson}""")
+
     options = param.Parameter(default=None, doc="""
         An optional dict of options passed to Echarts.setOption. Allows to fine-tune the rendering behavior.
         For example, you might want to use `options={ "replaceMerge": ['series'] })` when updating

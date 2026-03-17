@@ -52,3 +52,47 @@ def test_pyecharts_with_jscode(page):
 
     for v in data:
         expect(page.locator(f'text:has-text("{int(v["percent"]*100)}%")')).to_have_count(1)
+
+
+def test_echarts_geo_map(page):
+    geo_json = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "properties": {"name": "Region A"},
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [[[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]]]
+                }
+            },
+            {
+                "type": "Feature",
+                "properties": {"name": "Region B"},
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [[[10, 0], [20, 0], [20, 10], [10, 10], [10, 0]]]
+                }
+            },
+        ]
+    }
+
+    echart = {
+        "series": [{
+            "type": "map",
+            "map": "test_map",
+            "data": [
+                {"name": "Region A", "value": 100},
+                {"name": "Region B", "value": 200},
+            ]
+        }]
+    }
+
+    pane = ECharts(echart, map_data={"test_map": geo_json}, height=400, width=600, renderer='svg')
+
+    serve_component(page, pane)
+
+    # Verify the SVG geo paths rendered without errors
+    page.wait_for_timeout(1000)
+    svg_paths = page.locator("path")
+    expect(svg_paths.first).to_be_visible()

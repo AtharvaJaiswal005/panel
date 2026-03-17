@@ -20,6 +20,26 @@ def test_echart(document, comm):
     model = echart.get_root(document, comm)
     assert model.data == ECHART
 
+def test_echart_map_data(document, comm):
+    geo_json = {
+        "type": "FeatureCollection",
+        "features": [{
+            "type": "Feature",
+            "properties": {"name": "Region A"},
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]]]
+            }
+        }]
+    }
+    echart_data = {
+        "series": [{"type": "map", "map": "test_map", "data": []}]
+    }
+    echart = ECharts(echart_data, map_data={"test_map": geo_json}, width=500, height=500)
+    model = echart.get_root(document, comm)
+    assert model.data == echart_data
+    assert model.map_data == {"test_map": geo_json}
+
 def test_echart_event(document, comm):
     echart = ECharts(ECHART, width=500, height=500)
     echart.on_event('click', print)
